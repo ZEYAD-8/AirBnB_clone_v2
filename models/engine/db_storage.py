@@ -15,15 +15,6 @@ from models.state import State
 from models.user import User
 
 
-# if __name__ == "__main__":
-#     engine = create_engine('mysql+mysqldb://{}:{}@localhost/{}'.format(
-#         argv[1], argv[2], argv[3]), pool_pre_ping=True)
-
-#     Base.metadata.create_all(engine)
-
-#     Session = sessionmaker(bind=engine)
-#     with Session() as session:
-
 class DBStorage:
 
 
@@ -86,17 +77,7 @@ class DBStorage:
 
     def reload(self):
         """ configuration """
-        from models.base_model import Base
-        from models.base_model import BaseModel
-        from models.amenity import Amenity
-        from models.city import City
-        from models.place import Place
-        from models.review import Review
-        from models.state import State
-        from models.user import User
-
         Base.metadata.create_all(self.__engine)
-
         Session_factory = sessionmaker( bind=self.__engine,
                                         autocommit=False, 
                                         expire_on_commit=False )
