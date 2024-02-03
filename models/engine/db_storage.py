@@ -16,8 +16,6 @@ from models.user import User
 
 
 class DBStorage:
-
-
     __engine = None
     __session = None
 
@@ -25,15 +23,15 @@ class DBStorage:
         """A base class for all hbnb models"""
         MySQL_user = os.environ.get("HBNB_MYSQL_USER")
         MySQL_password = os.environ.get("HBNB_MYSQL_PWD")
-        MySQL_host = os.environ.get("HBNB_MYSQL_HOST") # (here = localhost)
+        MySQL_host = os.environ.get("HBNB_MYSQL_HOST")
         MySQL_database = os.environ.get("HBNB_MYSQL_DB")
 
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'
-                                         .format(MySQL_user, 
-                                                 MySQL_password, 
-                                                 MySQL_host, 
-                                                 MySQL_database), 
-                                                 pool_pre_ping=True)
+                                      .format(MySQL_user,
+                                              MySQL_password,
+                                              MySQL_host,
+                                              MySQL_database),
+                                      pool_pre_ping=True)
 
         if os.environ.get("HBNB_ENV") == "test":
             # Drop all tables
@@ -74,13 +72,12 @@ class DBStorage:
         if obj:
             self.__session.delete(obj)
 
-
     def reload(self):
         """ configuration """
         Base.metadata.create_all(self.__engine)
-        Session_factory = sessionmaker( bind=self.__engine,
-                                        autocommit=False, 
-                                        expire_on_commit=False )
+        Session_factory = sessionmaker(bind=self.__engine,
+                                       autocommit=False,
+                                       expire_on_commit=False)
 
         Session = scoped_session(Session_factory)
         self.__session = Session()

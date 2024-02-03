@@ -5,7 +5,7 @@ from models.base_model import BaseModel, Base
 from models.city import City
 from models.review import Review
 
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
 import models.engine
 
@@ -17,13 +17,16 @@ place_amenity = Table("place_amenity", Base.metadata,
                              primary_key=True,
                              nullable=False),
                       Column("amenity_id",
-                             String(60), 
+                             String(60),
                              ForeignKey("amenities.id"),
                              primary_key=True,
                              nullable=False))
 
+
 class Place(BaseModel, Base):
-    """ A place to stay """
+    """ Represents a Place for a MySQL database.
+    Inherits from SQLAlchemy Base and links to the MySQL table places
+    """
     __tablename__ = "places"
     city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
     user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
@@ -39,14 +42,18 @@ class Place(BaseModel, Base):
     latitude = Column(Float)
     longitude = Column(Float)
 
-    reviews = relationship("Review", backref="place", cascade="all, delete, delete-orphan")
-    amenities = relationship("Amenity", secondary=place_amenity, back_populates="place_amenities", viewonly=False)
-    
+    reviews = relationship("Review",
+                           backref="place",
+                           cascade="all, delete, delete-orphan")
+
+    amenities = relationship("Amenity",
+                             secondary=place_amenity,
+                             back_populates="place_amenities",
+                             viewonly=False)
+
     amenity_ids = []
 
     if os.environ.get('HBNB_TYPE_STORAGE') != 'db':
-
-        
         @property
         def reviews(self):
             """ Get a list of all linked Reviews. """
@@ -59,7 +66,7 @@ class Place(BaseModel, Base):
 
         @property
         def amenities(self):
-            """Get/set linked Amenities."""
+            """ Get/set linked Amenities."""
             from models.amenity import Amenity
             amenity_list = []
             for amenity in list(models.storage.all(Amenity).values()):
