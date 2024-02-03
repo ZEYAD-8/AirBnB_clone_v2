@@ -4,7 +4,7 @@ import os
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-
+from models.review import Review
 
 class User(BaseModel, Base):
     """This class defines a user by various attributes"""
@@ -15,3 +15,4 @@ class User(BaseModel, Base):
     last_name = Column(String(128))
 
     places = relationship("Place", backref="user", cascade="all, delete, delete-orphan")
+    reviews = relationship("Review", backref="user", cascade="all, delete, delete-orphan")
