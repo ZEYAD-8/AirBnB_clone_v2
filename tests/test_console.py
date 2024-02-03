@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 """A unit test module for the console (command interpreter).
 """
+import json
+import MySQLdb
 import os
+import sqlalchemy
 import unittest
 from io import StringIO
 from unittest.mock import patch
@@ -38,3 +41,107 @@ class TestHBNBCommand(unittest.TestCase):
             self.assertIn("'name': 'James'", cout.getvalue().strip())
             self.assertIn("'age': 17", cout.getvalue().strip())
             self.assertIn("'height': 5.9", cout.getvalue().strip())
+
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') != 'db', 'DBStorage test')
+    def test_db_create(self):
+        """Tests the create command with the database storage.
+        """
+        with patch('sys.stdout', new=StringIO()) as cout:
+            console = HBNBCommand()
+
+            with self.assertRaises(sqlalchemy.exc.OperationalError):
+                console.onecmd('create User')
+
+            clear_stream(cout)
+            console.onecmd('create User email="amr@gmail.com" password="123"')
+            id = cout.getvalue().strip()
+            connection = MySQLdb.connect(
+                host=os.getenv('HBNB_MYSQL_HOST'),
+                port=3306,
+                user=os.getenv('HBNB_MYSQL_USER'),
+                passwd=os.getenv('HBNB_MYSQL_PWD'),
+                db=os.getenv('HBNB_MYSQL_DB')
+            )
+            cursor = connection.cursor()
+            cursor.execute('SELECT * FROM users WHERE id="{}"'.format(id))
+            result = cursor.fetchone()
+            self.assertTrue(result is not None)
+            self.assertIn('amr@gmail.com', result)
+            self.assertIn('123', result)
+            cursor.close()
+            connection.close()
+
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') != 'db', 'DBStorage test')
+    def test_db_show(self):
+        """Tests the show command with the database storage.
+        """
+        with patch('sys.stdout', new=StringIO()) as cout:
+            console = HBNBCommand()
+
+            obj = User(email="zeyad@gmail.com", password="123")
+            connection = MySQLdb.connect(
+                host=os.getenv('HBNB_MYSQL_HOST'),
+                port=3306,
+                user=os.getenv('HBNB_MYSQL_USER'),
+                passwd=os.getenv('HBNB_MYSQL_PWD'),
+                db=os.getenv('HBNB_MYSQL_DB')
+            )
+            cursor = connection.cursor()
+            cursor.execute('SELECT * FROM users WHERE id="{}"'.format(obj.id))
+            result = cursor.fetchone()
+            self.assertTrue(result is None)
+            console.onecmd('show User {}'.format(obj.id))
+            self.assertEqual(
+                cout.getvalue().strip(),
+                '** no instance found **'
+            )
+            obj.save()
+            connection = MySQLdb.connect(
+                host=os.getenv('HBNB_MYSQL_HOST'),
+                port=3306,
+                user=os.getenv('HBNB_MYSQL_USER'),
+                passwd=os.getenv('HBNB_MYSQL_PWD'),
+                db=os.getenv('HBNB_MYSQL_DB')
+            )
+            cursor = connection.cursor()
+            cursor.execute('SELECT * FROM users WHERE id="{}"'.format(obj.id))
+            clear_stream(cout)
+            console.onecmd('show User {}'.format(obj.id))
+            result = cursor.fetchone()
+            self.assertTrue(result is not None)
+            self.assertIn('zeyad@gmail.com', result)
+            self.assertIn('123', result)
+            self.assertIn('zeyad@gmail.com', cout.getvalue())
+            self.assertIn('123', cout.getvalue())
+            cursor.close()
+            connection.close()
+
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') != 'db', 'DBStorage test')
+    def test_db_count(self):
+        """Tests the count command with the database storage.
+        """
+        with patch('sys.stdout', new=StringIO()) as cout:
+            console = HBNBCommand()
+            connection = MySQLdb.connect(
+                host=os.getenv('HBNB_MYSQL_HOST'),
+                port=3306,
+                user=os.getenv('HBNB_MYSQL_USER'),
+                passwd=os.getenv('HBNB_MYSQL_PWD'),
+                db=os.getenv('HBNB_MYSQL_DB')
+            )
+            cursor = connection.cursor()
+            cursor.execute('SELECT COUNT(*) FROM states;')
+            res = cursor.fetchone()
+            prev_count = int(res[0])
+            console.onecmd('create State name="Cairo"')
+            clear_stream(cout)
+            console.onecmd('count State')
+            cnt = cout.getvalue().strip()
+            self.assertEqual(int(cnt), prev_count + 1)
+            clear_stream(cout)
+            console.onecmd('count State')
+            cursor.close()
+            connection.close()
