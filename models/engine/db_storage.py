@@ -53,24 +53,22 @@ class DBStorage:
         Return:
             returns a dictionary of __object
         """
-        if cls is None:
-            classes = [State, City, User, Place, Review, Amenity]
-            for class_name in classes:
-                list_of_rows = self.__session.query(class_name)
-                dict_of_objects = {}
-                for instance in list_of_rows:
-                    obj_key = instance.__class__.__name__ + "." + instance.id
-                    dict_of_objects[obj_key] = instance
-        else:
+        dic = {}
+        if cls:
             if type(cls) is str:
                 cls = eval(cls)
-            list_of_rows = self.__session.query(cls.__name__)
-            dict_of_objects = {}
-            for instance in list_of_rows:
-                obj_key = instance.__class__.__name__ + "." + instance.id
-                dict_of_objects[obj_key] = instance
-        
-        return dict_of_objects
+            query = self.__session.query(cls)
+            for obj in query:
+                obj_key = "{}.{}".format(type(obj).__name__, obj.id)
+                dic[obj_key] = obj
+        else:
+            classes = [State, City, User, Place, Review, Amenity]
+            for class_name in classes:
+                query = self.__session.query(class_name)
+                for obj in query:
+                    obj_key = "{}.{}".format(type(obj).__name__, obj.id)
+                    dic[obj_key] = obj
+        return (dic)
 
     def new(self, obj):
         """ add a new element in the table """
