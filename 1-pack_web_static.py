@@ -1,8 +1,10 @@
 #!/usr/bin/python3
-
+""" Fabfile that create a .tgz archive from
+the contents of web_static folder"""
 from fabric.api import local, lcd
 from datetime import datetime
 import os
+
 
 def do_pack():
     """ this function will pack the contents of the web static folder and
@@ -20,8 +22,8 @@ def do_pack():
             local(f"tar -zcvf {archive_name} ../web_static/")
             archive_size = os.path.getsize(f"{archive_name}")
 
-        print("web_static packed: {}/{} -> {}".format(directory_name, 
-                                                      archive_name, 
+        print("web_static packed: {}/{} -> {}".format(directory_name,
+                                                      archive_name,
                                                       archive_size))
 
         return f"{directory_name}/{archive_name}"
