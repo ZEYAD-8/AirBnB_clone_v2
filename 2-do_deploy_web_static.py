@@ -50,9 +50,10 @@ def do_deploy(archive_path):
 
         # Restart nginx service to apply the changes
         run('sudo service nginx restart')
+
+        # Print and return
+        print("New version deployed!")
+        return True
+
     except Exception:
         return False
-
-    # Print and return
-    print("New version deployed!")
-    return True
