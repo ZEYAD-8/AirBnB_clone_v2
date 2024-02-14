@@ -16,6 +16,6 @@ def deploy():
     if not archive_path:
         print("Archive was not succesfully created")
         return False
-    
+
     return_value = do_deploy(archive_path)
     return return_value
