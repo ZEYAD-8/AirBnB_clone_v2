@@ -3,6 +3,9 @@ from fabric.api import *
 from datetime import datetime
 import os
 
+# Set of servers
+env.hosts = ['34.207.156.226', '54.90.63.216']
+
 def do_deploy(archive_path):
     """ deploys the new version to the servers listed
     """
@@ -12,9 +15,6 @@ def do_deploy(archive_path):
         return False
 
     try:
-        # Set of servers
-        env.hosts = ['34.207.156.226', '54.90.63.216']
-
         # Transfer the archive
         put(archive_path, "/tmp/", use_sudo=False, mirror_local_mode=False, mode=None)
 
@@ -38,7 +38,11 @@ def do_deploy(archive_path):
         # Recreate the symbolic link to the new release
         run(f"rm /data/web_static/current")
         run(f"ln -sf /data/web_static/releases/{file_name} /data/web_static/current")
-    
+
+        # Restart nginx service to apply the changes
+        run('sudo service nginx restart')
+
+
     except Exception:
         return False
     
