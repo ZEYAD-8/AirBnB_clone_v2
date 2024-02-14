@@ -18,6 +18,12 @@ def do_pack():
             os.makedirs(directory_name)
         with lcd(directory_name):
             local(f"tar -zcvf {archive_name} ../web_static/")
+            archive_size = os.path.getsize(f"{archive_name}")
+
+        print("web_static packed: {}/{} -> {}".format(directory_name, 
+                                                      archive_name, 
+                                                      archive_size))
+
         return f"{directory_name}/{archive_name}"
 
     except Exception:
