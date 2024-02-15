@@ -26,27 +26,28 @@ def do_deploy(archive_path):
         file_name = os.path.basename(archive_path).split(".")[0]
 
         # Create the directory on the server if it doesn't exist
-        run(f"mkdir -p /data/web_static/releases/{file_name}")
+        run(f"sudo mkdir -p /data/web_static/releases/{file_name}")
 
         # Decompress the archive
-        run("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
+        run("sudo tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
             .format(file_name, file_name))
 
         # Adjust the content location
         up_to_releases = "/data/web_static/releases"
-        run("mv {}/{}/web_static/* {}/{}/".format(up_to_releases,
-                                                  file_name,
-                                                  up_to_releases,
-                                                  file_name))
+        run("sudo mv {}/{}/web_static/* {}/{}/".format(up_to_releases,
+                                                       file_name,
+                                                       up_to_releases,
+                                                       file_name))
 
-        run(f"rm -rf /data/web_static/releases/{file_name}/web_static")
+        run(f"sudo rm -rf /data/web_static/releases/{file_name}/web_static")
 
         # Remove the archive
-        run(f"rm /tmp/{file_name}.tgz")
+        run(f"sudo rm /tmp/{file_name}.tgz")
 
-        # Recreate the symbolic link to the new release
-        run(f"rm /data/web_static/current")
-        run(f"ln -sf {up_to_releases}/{file_name} /data/web_static/current")
+        # Recreate the symbolic link (current) to the new release
+        up_to_current = "/data/web_static/current"
+        run(f"sudo rm {up_to_current}")
+        run(f"sudo ln -sf {up_to_releases}/{file_name} {up_to_current}")
 
         # Restart nginx service to apply the changes
         run('sudo service nginx restart')
