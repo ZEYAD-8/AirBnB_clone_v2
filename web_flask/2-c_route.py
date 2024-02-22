@@ -19,11 +19,11 @@ def hbnb():
     """Function that displays HBNB"""
     return "HBNB"
 
+
 @app.route('/c/<text>', strict_slashes=False)
-def c(text=""):
+def ctext(text):
     """Function that displays the letter c then the text"""
-    text = text.replace("_", " ")
-    return "c " + text
+    return "C {}".format(text.replace("_", " "))
 
 
 if __name__ == '__main__':
